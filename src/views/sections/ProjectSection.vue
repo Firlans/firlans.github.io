@@ -63,6 +63,7 @@ const projects = [
           :description="project.description"
           :tags="project.tags"
           :links="project.links"
+          :layout="'horizontal'"
           class="slide-in"
         />
       </div>

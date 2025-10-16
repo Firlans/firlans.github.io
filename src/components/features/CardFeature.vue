@@ -3,6 +3,12 @@ import BaseTag from '../base/BaseTag.vue'
 // Anda harus menambahkan BaseTag.vue di folder base/
 
 const props = defineProps({
+  layout: {
+    type: String,
+    default: 'horizontal', // Default untuk Experience/Education
+    validator: (value) => ['horizontal', 'vertical'].includes(value),
+  },
+
   // URL gambar (Logo Perusahaan)
   imgSrc: {
     type: String,
@@ -43,6 +49,8 @@ const props = defineProps({
   links: { type: Array, default: () => [] },
 })
 
+const isVertical = props.layout === 'vertical'
+
 function renderTagContent(tag) {
   return tag.includes('<i') ? tag : tag
 }
@@ -50,7 +58,13 @@ function renderTagContent(tag) {
 
 <template>
   <div
-    class="flex flex-col md:flex-row p-6 bg-white shadow-lg rounded-xl transition duration-300 hover:shadow-xl"
+    class="p-6 bg-white shadow-lg rounded-xl transition duration-300 hover:shadow-xl"
+    :class="{
+      // Layout Vertikal (Project): Selalu flex-col di semua ukuran
+      'flex flex-col': isVertical,
+      // Layout Horizontal (Experience/Education): flex-col di mobile, flex-row di desktop
+      'flex flex-col md:flex-row': !isVertical,
+    }"
   >
     <div class="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
       <img

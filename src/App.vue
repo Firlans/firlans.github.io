@@ -1,6 +1,10 @@
 <script setup>
+import HeaderLayout from './components/layouts/HeaderLayout.vue'
+import FooterLayout from './components/layouts/FooterLayout.vue'
 import LandingPage from './views/LandingPage.vue'
 </script>
 <template>
-  <LandingPage></LandingPage>
+  <HeaderLayout />
+  <LandingPage />
+  <FooterLayout />
 </template>
