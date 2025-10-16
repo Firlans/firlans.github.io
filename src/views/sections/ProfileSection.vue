@@ -16,7 +16,7 @@ const props = defineProps({
   },
   profilePictureSrc: {
     type: String,
-    default: '/public/profile-picture.png',
+    default: './profile-picture.png',
   },
   ctaLink: {
     type: String,

@@ -6,7 +6,7 @@ import CardFeature from '@/components/features/CardFeature.vue'
 const experiences = [
   {
     id: 1,
-    imgSrc: '/public/imamatek-logo.jpeg',
+    imgSrc: './imamatek-logo.jpeg',
     title: 'Integritas Makmur Mandiri',
     shortDescription: 'Programmer Biz-A',
     description:
@@ -21,7 +21,7 @@ const experiences = [
   },
   {
     id: 2,
-    imgSrc: '/public/lokpromedia-logo.png',
+    imgSrc: './lokpromedia-logo.png',
     title: 'Lokpro Media',
     shortDescription: 'Content Researcher',
     description:
@@ -38,7 +38,7 @@ const experiences = [
   },
   {
     id: 3,
-    imgSrc: '/public/develophilia-logo.jpeg',
+    imgSrc: './develophilia-logo.jpeg',
     title: 'Develophilia',
     shortDescription: 'Research & Development',
     description:

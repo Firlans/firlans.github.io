@@ -8,7 +8,7 @@ import BaseTag from '@/components/base/BaseTag.vue'
 const educationList = [
   {
     id: 1,
-    imgSrc: '/public/universitas-pamulang-logo.jpeg',
+    imgSrc: './universitas-pamulang-logo.jpeg',
     title: 'Pamulang University',
     program: 'Informatics Engineering',
     period: '2022 - 2025',
@@ -17,7 +17,7 @@ const educationList = [
   },
   {
     id: 2,
-    imgSrc: '/public/bangkit-academy-logo.jpeg',
+    imgSrc: './bangkit-academy-logo.jpeg',
     title: 'Bangkit Academy',
     program: 'Cloud Computing Learning Path',
     period: '2024',
