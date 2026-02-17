@@ -33,7 +33,7 @@ const projects = [
   },
   {
     id: 3,
-    imgSrc: '.  /perpustakaan digital.png',
+    imgSrc: './perpustakaan digital.png',
     title: 'Perpustakaan Digital',
     description:
       'A web-based digital library application featuring an admin panel that allows for efficient management of books, categories, and users. Users can easily borrow books available within the application. This platform is designed to streamline library operations and enhance the user experience, making it an ideal solution for educational institutions and avid readers alike. (70%)',

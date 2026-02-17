@@ -5,6 +5,7 @@ const quickLinks = [
   { href: '#projects', text: 'Projects' },
   { href: '#about', text: 'About' },
   { href: '#contact', text: 'Contact' },
+  { href: 'https://drive.google.com/file/d/1so4pu2vvHhbLvi1_ihlIx9u94jqmF9db/view?usp=sharing', text: 'Download CV', target: '_blank' },
 ]
 
 const socialLinks = [
@@ -31,9 +32,14 @@ const socialLinks = [
             <h4 class="text-lg font-semibold mb-3">Quick Links</h4>
             <ul>
               <li v-for="link in quickLinks" :key="link.href" class="mb-1">
-                <a :href="link.href" class="text-gray-400 hover:text-indigo-400 transition">{{
-                  link.text
-                }}</a>
+                <a
+                  :href="link.href"
+                  :target="link.target || '_self'"
+                  :rel="link.target === '_blank' ? 'noopener noreferrer' : ''"
+                  class="text-gray-400 hover:text-indigo-400 transition"
+                >
+                  {{ link.text }}
+                </a>
               </li>
             </ul>
           </div>
