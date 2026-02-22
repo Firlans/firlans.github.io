@@ -1,105 +1,149 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { supabase } from '@/lib/supabase'
 
 const userStore = useUserStore()
 
-// Local array variable for comments (will integrate with PostgreSQL later)
-const comments = ref([
-  {
-    id: 1,
-    userId: 'default-user-1',
-    name: 'John Doe',
-    message: 'Great portfolio! Really impressed with your projects.',
-    date: new Date('2024-01-15').toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  },
-  {
-    id: 2,
-    userId: 'default-user-2',
-    name: 'Jane Smith',
-    message: 'Amazing work on the SIMPUL 8 project. Keep it up!',
-    date: new Date('2024-02-20').toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
-])
+const comments = ref([])
+const isLoading = ref(false)
+const loadError = ref('')
+const isSubmitting = ref(false)
+const isUpdating = ref(false)
+const isDeleting = ref(false)
 
 const newComment = ref({
   name: '',
+  email: '',
   message: ''
 })
 
-const isSubmitting = ref(false)
-
-// State for editing comment
 const editingCommentId = ref(null)
 const editingMessage = ref('')
 
-// Add a new comment
-function addComment() {
+function formatDate(value) {
+  return new Date(value).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+function mapComment(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    name: row.name,
+    email: row.email || '',
+    message: row.message,
+    date: formatDate(row.created_at),
+    createdAt: row.created_at
+  }
+}
+
+async function loadComments() {
+  if (!supabase) {
+    loadError.value = 'Supabase belum dikonfigurasi di file .env.'
+    return
+  }
+
+  isLoading.value = true
+  loadError.value = ''
+
+  const { data, error } = await supabase
+    .from('comments')
+    .select('id, user_id, name, email, message, created_at')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    loadError.value = `Gagal memuat komentar: ${error.message}`
+    comments.value = []
+  } else {
+    comments.value = (data || []).map(mapComment)
+  }
+
+  isLoading.value = false
+}
+
+async function addComment() {
   if (!newComment.value.name.trim() || !newComment.value.message.trim()) {
-    alert('Please fill in all fields')
+    alert('Please fill in all required fields')
+    return
+  }
+
+  if (!supabase) {
+    alert('Supabase belum dikonfigurasi di file .env.')
     return
   }
 
   isSubmitting.value = true
 
-  // Simulate adding comment
-  const comment = {
-    id: Date.now(),
-    userId: userStore.userId, // Associate comment with userId
+  const payload = {
+    user_id: userStore.userId,
     name: newComment.value.name.trim(),
-    message: newComment.value.message.trim(),
-    date: new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    email: newComment.value.email.trim() || null,
+    message: newComment.value.message.trim()
   }
 
-  comments.value.unshift(comment) // Add to beginning of array
+  const { data, error } = await supabase
+    .from('comments')
+    .insert(payload)
+    .select('id, user_id, name, email, message, created_at')
+    .single()
 
-  // Reset form
+  if (error) {
+    alert(`Failed to post comment: ${error.message}`)
+    isSubmitting.value = false
+    return
+  }
+
+  comments.value.unshift(mapComment(data))
   newComment.value.name = ''
+  newComment.value.email = ''
   newComment.value.message = ''
   isSubmitting.value = false
 }
 
-// Delete a comment - only allow if user owns the comment
-function deleteComment(id) {
+async function deleteComment(id) {
   const comment = comments.value.find(c => c.id === id)
-
   if (!comment) return
 
-  // Check if the current user owns this comment
   if (comment.userId !== userStore.userId) {
     alert('You can only delete your own comments')
     return
   }
 
-  const index = comments.value.findIndex(c => c.id === id)
-  if (index > -1) {
-    comments.value.splice(index, 1)
+  if (!supabase) {
+    alert('Supabase belum dikonfigurasi di file .env.')
+    return
   }
+
+  isDeleting.value = true
+
+  const { error } = await supabase
+    .from('comments')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userStore.userId)
+
+  if (error) {
+    alert(`Failed to delete comment: ${error.message}`)
+    isDeleting.value = false
+    return
+  }
+
+  comments.value = comments.value.filter(c => c.id !== id)
+  isDeleting.value = false
 }
 
-// Check if user can delete a comment
 function canDeleteComment(commentUserId) {
   return commentUserId === userStore.userId
 }
 
-// Start editing a comment
 function startEditComment(comment) {
   const commentData = comments.value.find(c => c.id === comment.id)
   if (!commentData) return
 
-  // Check if the current user owns this comment
   if (commentData.userId !== userStore.userId) {
     alert('You can only edit your own comments')
     return
@@ -109,36 +153,54 @@ function startEditComment(comment) {
   editingMessage.value = comment.message
 }
 
-// Cancel editing
 function cancelEditComment() {
   editingCommentId.value = null
   editingMessage.value = ''
 }
 
-// Save edited comment
-function saveEditComment() {
+async function saveEditComment() {
   if (!editingMessage.value.trim()) {
     alert('Message cannot be empty')
     return
   }
 
-  const comment = comments.value.find(c => c.id === editingCommentId.value)
-  if (comment) {
-    comment.message = editingMessage.value.trim()
-    comment.date = new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+  if (!supabase) {
+    alert('Supabase belum dikonfigurasi di file .env.')
+    return
   }
 
+  isUpdating.value = true
+
+  const { data, error } = await supabase
+    .from('comments')
+    .update({ message: editingMessage.value.trim() })
+    .eq('id', editingCommentId.value)
+    .eq('user_id', userStore.userId)
+    .select('id, user_id, name, email, message, created_at')
+    .single()
+
+  if (error) {
+    alert(`Failed to update comment: ${error.message}`)
+    isUpdating.value = false
+    return
+  }
+
+  const index = comments.value.findIndex(c => c.id === editingCommentId.value)
+  if (index !== -1) {
+    comments.value[index] = mapComment(data)
+  }
+
+  isUpdating.value = false
   cancelEditComment()
 }
 
-// Check if user can edit a comment
 function canEditComment(commentUserId) {
   return commentUserId === userStore.userId
 }
+
+onMounted(() => {
+  loadComments()
+})
 </script>
 
 <template>
@@ -171,6 +233,7 @@ function canEditComment(commentUserId) {
               </label>
               <input
                 id="comment-email"
+                v-model="newComment.email"
                 type="email"
                 placeholder="your@email.com"
                 class="w-full px-4 py-3 text-base text-gray-900 bg-white border-2 border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 ease-in-out"
@@ -205,7 +268,15 @@ function canEditComment(commentUserId) {
           {{ comments.length }} Comment{{ comments.length !== 1 ? 's' : '' }}
         </h3>
 
-        <div v-if="comments.length === 0" class="text-center py-8">
+        <div v-if="isLoading" class="text-center py-8">
+          <p class="text-gray-500">Loading comments...</p>
+        </div>
+
+        <div v-if="loadError" class="text-center py-4">
+          <p class="text-red-600">{{ loadError }}</p>
+        </div>
+
+        <div v-if="!isLoading && !loadError && comments.length === 0" class="text-center py-8">
           <p class="text-gray-500">No comments yet. Be the first to comment!</p>
         </div>
 
@@ -230,6 +301,7 @@ function canEditComment(commentUserId) {
               <button
                 v-if="canEditComment(comment.userId)"
                 @click="startEditComment(comment)"
+                :disabled="isUpdating || isDeleting"
                 class="text-gray-400 hover:text-indigo-500 transition-colors duration-200"
                 aria-label="Edit comment"
               >
@@ -238,6 +310,7 @@ function canEditComment(commentUserId) {
               <button
                 v-if="canDeleteComment(comment.userId)"
                 @click="deleteComment(comment.id)"
+                :disabled="isDeleting || isUpdating"
                 class="text-gray-400 hover:text-red-500 transition-colors duration-200"
                 aria-label="Delete comment"
               >
@@ -259,9 +332,10 @@ function canEditComment(commentUserId) {
             <div class="flex space-x-2 mt-2">
               <button
                 @click="saveEditComment"
+                :disabled="isUpdating"
                 class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
               >
-                Save
+                {{ isUpdating ? 'Saving...' : 'Save' }}
               </button>
               <button
                 @click="cancelEditComment"
@@ -298,4 +372,3 @@ textarea::-webkit-scrollbar-thumb:hover {
   background: #a0a0a0;
 }
 </style>
-
