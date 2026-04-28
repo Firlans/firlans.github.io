@@ -14,7 +14,7 @@ const experiences = [
     duration: 'Jan 2025 - present',
     details: [
       'Developed web applications using the Biz-A framework, tailored to client requirements, including manufacturing and finance features.',
-      'Conducted comprehensive unit testing with Jest.js to ensure robust and reliable code.',
+      'Conducted comprehensive unit testing with Jest js to ensure robust and reliable code.',
       'Implemented efficient data requests using Observables for enhanced asynchronous operations.',
     ],
     tags: ['Biz-a framework', 'Observables', 'jest js'],
