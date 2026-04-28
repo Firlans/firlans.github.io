@@ -2,12 +2,13 @@
 import { onMounted, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { supabase } from '@/lib/supabase'
+import MaintenanceLayer from '@/components/base/MaintenanceLayer.vue'
 
 const userStore = useUserStore()
 
 const comments = ref([])
 const isLoading = ref(false)
-const loadError = ref('')
+const loadError = ref(false)
 const isSubmitting = ref(false)
 const isUpdating = ref(false)
 const isDeleting = ref(false)
@@ -43,12 +44,13 @@ function mapComment(row) {
 
 async function loadComments() {
   if (!supabase) {
-    loadError.value = 'Supabase belum dikonfigurasi di file .env.'
+    loadError.value = true
+    console.error('Supabase belum dikonfigurasi di file .env.')
     return
   }
 
   isLoading.value = true
-  loadError.value = ''
+  loadError.value = false
 
   const { data, error } = await supabase
     .from('comments')
@@ -56,7 +58,8 @@ async function loadComments() {
     .order('created_at', { ascending: false })
 
   if (error) {
-    loadError.value = `Gagal memuat komentar: ${error.message}`
+    loadError.value = true
+    console.error('Error loading comments:', error)
     comments.value = []
   } else {
     comments.value = (data || []).map(mapComment)
@@ -205,11 +208,17 @@ onMounted(() => {
 
 <template>
   <section id="rate" class="py-16 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-4">Comments</h2>
-      <p class="text-gray-600 text-center mb-10">
-        Leave a comment below. Your feedback means a lot to me!
-      </p>
+    <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-4">Comments</h2>
+    <p class="text-gray-600 text-center mb-10">
+      Leave a comment below. Your feedback means a lot to me!
+    </p>
+    <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <MaintenanceLayer
+        v-if="loadError"
+        label="Unable to load comments"
+        description="Service is temporarily unavailable. Please refresh the page or try again later."
+      />
+
 
       <!-- Comment Form -->
       <div class="bg-white rounded-2xl shadow-lg p-6 mb-10">
@@ -262,18 +271,18 @@ onMounted(() => {
         </form>
       </div>
 
+
+      <!-- <div v-if="loadError" class="text-center py-4">
+        <MaintenanceSection />
+      </div> -->
       <!-- Comments List -->
-      <div class="space-y-6">
+      <div v-if="!loadError" class="space-y-6">
         <h3 class="text-xl font-semibold text-gray-900">
           {{ comments.length }} Comment{{ comments.length !== 1 ? 's' : '' }}
         </h3>
 
         <div v-if="isLoading" class="text-center py-8">
           <p class="text-gray-500">Loading comments...</p>
-        </div>
-
-        <div v-if="loadError" class="text-center py-4">
-          <p class="text-red-600">{{ loadError }}</p>
         </div>
 
         <div v-if="!isLoading && !loadError && comments.length === 0" class="text-center py-8">
