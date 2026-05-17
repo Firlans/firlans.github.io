@@ -20,33 +20,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repo app ke folder apps/firlans.github.io
-      #    agar struktur path-nya sama dengan lokal
+      # 1. Checkout my-monorepo ke workspace root
+      #    Ini menyediakan: packages/, pnpm-workspace.yaml, pnpm-lock.yaml
+      #    Jika repo private, tambahkan: token: ${{ secrets.MONOREPO_TOKEN }}
+      - name: Checkout monorepo (packages & workspace config)
+        uses: actions/checkout@v4
+        with:
+          repository: Firlans/my-monorepo
+          path: .
+
+      # 2. Checkout app terbaru ke apps/firlans.github.io/
+      #    Override folder lama dari monorepo dengan versi terkini
       - name: Checkout app (firlans.github.io)
         uses: actions/checkout@v4
         with:
           path: apps/firlans.github.io
-
-      # 2. Checkout my-monorepo untuk mengambil packages/
-      #    Jika repo private, tambahkan: token: ${{ secrets.MONOREPO_TOKEN }}
-      - name: Checkout packages (my-monorepo)
-        uses: actions/checkout@v4
-        with:
-          repository: Firlans/my-monorepo
-          path: _monorepo
-
-      # 3. Copy packages/ ke root workspace agar Vite alias ../../packages/* valid
-      - name: Setup monorepo structure
-        run: |
-          cp -r _monorepo/packages ./packages
-          echo '{"name":"monorepo-ci","private":true,"type":"module","packageManager":"pnpm@10.28.1"}' > package.json
-          printf 'packages:\n  - apps/*\n  - packages/**\n' > pnpm-workspace.yaml
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
 
+      # pnpm-lock.yaml tersedia di root → cache: pnpm berjalan normal
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -54,7 +49,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build @packages/components (CSS)
         run: pnpm --filter @packages/components build:css
