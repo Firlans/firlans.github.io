@@ -1,25 +1,75 @@
-name: Deploy
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
       - main
-      - features
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # 1. Checkout my-monorepo ke workspace root
+      #    Ini menyediakan: packages/, pnpm-workspace.yaml, pnpm-lock.yaml
+      #    Jika repo private, tambahkan: token: ${{ secrets.MONOREPO_TOKEN }}
+      - name: Checkout monorepo (packages & workspace config)
+        uses: actions/checkout@v4
         with:
-          node-version: 24
-      - run: npm install
-      - run: npm run build
-      - uses: peaceiris/actions-gh-pages@v4
+          repository: Firlans/my-monorepo
+          path: .
+
+      # 2. Checkout app terbaru ke apps/firlans.github.io/
+      #    Override folder lama dari monorepo dengan versi terkini
+      - name: Checkout app (firlans.github.io)
+        uses: actions/checkout@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: main
-          publish_dir: ./dist
+          path: apps/firlans.github.io
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      # pnpm-lock.yaml tersedia di root → cache: pnpm berjalan normal
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build @packages/components (CSS)
+        run: pnpm --filter @packages/components build:css
+
+      - name: Build app
+        run: pnpm --filter my-portofolio build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/firlans.github.io/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
