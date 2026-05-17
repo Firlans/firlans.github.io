@@ -1,5 +1,9 @@
 <script setup>
+import { ref, computed } from 'vue'
 import CardFeature from '@/components/features/CardFeature.vue'
+import BaseButton from '@/components/base/BaseButton.vue'
+
+const showAll = ref(false)
 
 // 1. Definisikan data Proyek
 const projects = [
@@ -46,7 +50,24 @@ const projects = [
       { url: 'https://github.com/Firlans/website-perpustakaan-digital', text: 'GitHub' },
     ],
   },
+  {
+    id: 4,
+    imgSrc: './finance-app.png',
+    title: 'Finance App (Ongoing)',
+    description:
+      'A web-based digital library application featuring an admin panel that allows for efficient management of books, categories, and users. Users can easily borrow books available within the application. This platform is designed to streamline library operations and enhance the user experience, making it an ideal solution for educational institutions and avid readers alike. (70%)',
+    tags: ['Go', 'Fiber', 'postgreSQL'],
+    links: [
+      {
+        url: 'https://firlans.github.io/finance-app/',
+        text: 'Website',
+      },
+      { url: 'https://github.com/Firlans/finance-app', text: 'GitHub' },
+    ],
+  },
 ]
+
+const visibleProjects = computed(() => (showAll.value ? projects : projects.slice(0, 3)))
 </script>
 
 <template>
@@ -56,7 +77,7 @@ const projects = [
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <CardFeature
-          v-for="project in projects"
+          v-for="project in visibleProjects"
           :key="project.id"
           :imgSrc="project.imgSrc"
           :title="project.title"
@@ -65,6 +86,14 @@ const projects = [
           :links="project.links"
           :layout="'horizontal'"
           class="slide-in"
+        />
+      </div>
+
+      <div class="flex justify-center mt-8">
+        <BaseButton
+          :text="showAll ? 'Sembunyikan' : 'Lihat Semua Project'"
+          :icon="showAll ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'"
+          :onClick="() => (showAll = !showAll)"
         />
       </div>
     </div>

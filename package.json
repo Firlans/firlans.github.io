@@ -16,6 +16,8 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@packages/components": "workspace:*",
+    "@packages/utils": "workspace:*",
     "@supabase/supabase-js": "^2.97.0",
     "@tailwindcss/vite": "^4.1.14",
     "pinia": "^3.0.3",

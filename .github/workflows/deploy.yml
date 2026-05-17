@@ -1,0 +1,80 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo app ke folder apps/firlans.github.io
+      #    agar struktur path-nya sama dengan lokal
+      - name: Checkout app (firlans.github.io)
+        uses: actions/checkout@v4
+        with:
+          path: apps/firlans.github.io
+
+      # 2. Checkout my-monorepo untuk mengambil packages/
+      #    Jika repo private, tambahkan: token: ${{ secrets.MONOREPO_TOKEN }}
+      - name: Checkout packages (my-monorepo)
+        uses: actions/checkout@v4
+        with:
+          repository: Firlans/my-monorepo
+          path: _monorepo
+
+      # 3. Copy packages/ ke root workspace agar Vite alias ../../packages/* valid
+      - name: Setup monorepo structure
+        run: |
+          cp -r _monorepo/packages ./packages
+          echo '{"name":"monorepo-ci","private":true,"type":"module","packageManager":"pnpm@10.28.1"}' > package.json
+          printf 'packages:\n  - apps/*\n  - packages/**\n' > pnpm-workspace.yaml
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build @packages/components (CSS)
+        run: pnpm --filter @packages/components build:css
+
+      - name: Build app
+        run: pnpm --filter my-portofolio build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/firlans.github.io/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
