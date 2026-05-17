@@ -1,28 +1,20 @@
-name: Deploy to GitHub Pages
+name: Build and Deploy to GitHub Pages
 
 on:
   push:
     branches:
-      - main
       - features
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
+  contents: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       # 1. Checkout my-monorepo ke workspace root
-      #    Ini menyediakan: packages/, pnpm-workspace.yaml, pnpm-lock.yaml
       #    Jika repo private, tambahkan: token: ${{ secrets.MONOREPO_TOKEN }}
       - name: Checkout monorepo (packages & workspace config)
         uses: actions/checkout@v4
@@ -30,17 +22,16 @@ jobs:
           repository: Firlans/my-monorepo
           path: .
 
-      # 2. Checkout app terbaru ke apps/firlans.github.io/
-      #    Override folder lama dari monorepo dengan versi terkini
+      # 2. Checkout app terbaru (branch features) ke apps/firlans.github.io/
       - name: Checkout app (firlans.github.io)
         uses: actions/checkout@v4
         with:
+          ref: features
           path: apps/firlans.github.io
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
-      # pnpm-lock.yaml tersedia di root → cache: pnpm berjalan normal
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -56,19 +47,11 @@ jobs:
       - name: Build app
         run: pnpm --filter my-portofolio build
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      # 3. Push hasil build ke branch main → GitHub Pages serve dari sana
+      - name: Push dist to main branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: apps/firlans.github.io/dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: apps/firlans.github.io/dist
+          publish_branch: main
+          force_orphan: true
