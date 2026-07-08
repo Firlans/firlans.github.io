@@ -19,13 +19,13 @@ const props = defineProps({
 })
 </script>
 
-<template lang="">
+<template>
   <button
     @click="props.onClick"
     :disabled="disabled"
-    class="/* Ukuran & Font */ px-6 py-3 text-lg font-medium text-white /* Bentuk & Bayangan */ rounded-xl shadow-md /* Warna (Biru Gelap) */ bg-blue-600 /* Efek Hover & Transisi */ hover:bg-blue-700 transition duration-150 ease-in-out /* Styling Disabled */ disabled:bg-blue-400 disabled:cursor-not-allowed /* Pastikan Teks Terpusat (jika kontennya lebih kompleks) */ flex items-center justify-center space-x-2"
+    class="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold text-white dark:text-slate-900 bg-slate-900 dark:bg-slate-100 rounded-xl shadow-sm hover:bg-indigo-600 dark:hover:bg-indigo-400 dark:hover:text-white transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed space-x-2"
   >
     <i v-if="icon && !iconRight" :class="icon"></i>
-    <p>{{ props.text }}</p>
+    <span>{{ props.text }}</span>
   </button>
 </template>

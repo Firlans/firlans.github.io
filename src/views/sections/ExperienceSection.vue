@@ -57,13 +57,27 @@ const experiences = [
 </script>
 
 <template>
-  <section id="experiences" class="py-16 bg-gray-50">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-10">Experiences</h2>
+  <section id="experiences" class="relative py-24 bg-white dark:bg-slate-900 overflow-hidden transition-colors duration-500">
+    <!-- Subtle Background Elements -->
+    <div class="absolute inset-0 z-0 bg-slate-50/50 dark:bg-slate-800/30"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64 bg-indigo-50/50 dark:bg-indigo-500/5 rounded-full blur-3xl opacity-50"></div>
+    
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-16 flex items-center gap-6">
+        <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1 hidden sm:block"></div>
+        <div class="text-center">
+          <h2 class="text-sm font-mono text-indigo-600 dark:text-indigo-400 tracking-wider uppercase mb-2">My Journey</h2>
+          <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">Work Experience</h3>
+        </div>
+        <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1 hidden sm:block"></div>
+      </div>
 
-      <div class="space-y-8">
+      <div class="relative space-y-8">
+        <!-- Connecting Line for timeline effect -->
+        <div class="absolute left-8 md:left-[4.5rem] top-8 bottom-8 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
+
         <CardFeature
-          v-for="exp in experiences"
+          v-for="(exp, index) in experiences"
           :key="exp.id"
           :imgSrc="exp.imgSrc"
           :title="exp.title"
@@ -72,7 +86,7 @@ const experiences = [
           :duration="exp.duration"
           :details="exp.details"
           :tags="exp.tags"
-          class="slide-in"
+          class="relative z-10"
         />
       </div>
     </div>

@@ -58,54 +58,64 @@ function renderTagContent(tag) {
 
 <template>
   <div
-    class="p-6 bg-white shadow-lg rounded-xl transition duration-300 hover:shadow-xl"
+    class="relative p-6 lg:p-8 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-slate-200/60 dark:border-slate-700/60 rounded-2xl transition-all duration-300 hover:bg-white dark:hover:bg-slate-800 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 group"
     :class="{
-      // Layout Vertikal (Project): Selalu flex-col di semua ukuran
       'flex flex-col': isVertical,
-      // Layout Horizontal (Experience/Education): flex-col di mobile, flex-row di desktop
-      'flex flex-col md:flex-row': !isVertical,
+      'flex flex-col md:flex-row gap-6 md:gap-8': !isVertical,
     }"
   >
-    <div class="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-      <img
-        :src="props.imgSrc"
-        :alt="props.title + ' logo'"
-        class="w-16 h-16 object-cover rounded-full border-2 border-gray-100"
-      />
+    <div class="flex-shrink-0">
+      <div class="relative w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 group-hover:shadow-md transition-all duration-300">
+        <img
+          :src="props.imgSrc"
+          :alt="props.title + ' logo'"
+          class="w-full h-full object-contain p-2"
+        />
+      </div>
     </div>
 
     <div class="flex-grow">
-      <h3 class="text-xl font-bold text-gray-900 mb-1">{{ props.title }}</h3>
-      <h4 class="text-lg font-semibold text-indigo-600 mb-2">{{ props.shortDescription }}</h4>
+      <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-2">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">{{ props.title }}</h3>
+          <h4 class="text-base font-medium text-slate-600 dark:text-slate-300 mt-1">{{ props.shortDescription }}</h4>
+        </div>
+        <div class="mt-2 md:mt-0 font-mono text-sm text-slate-400 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-700/50 px-3 py-1 rounded-full w-fit">
+          {{ props.duration }}
+        </div>
+      </div>
 
-      <p class="text-gray-700 mb-4">{{ props.description }}</p>
-
-      <p class="text-sm font-medium text-gray-500 mb-4">{{ props.duration }}</p>
+      <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-5 mt-4">{{ props.description }}</p>
 
       <ul
         v-if="props.details.length"
-        class="list-disc list-inside text-gray-700 space-y-1 mb-4 pl-4"
+        class="space-y-2 mb-6"
       >
-        <li v-for="(detail, index) in props.details" :key="index">
+        <li v-for="(detail, index) in props.details" :key="index" class="flex text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+          <span class="text-indigo-400 dark:text-indigo-500 mr-2 mt-0.5">▹</span>
           {{ detail }}
         </li>
       </ul>
 
-      <template v-if="props.tags.length">
-        <BaseTag v-for="(tag, index) in props.tags" :key="'tag-' + index" class="m-1">
-          <span v-html="renderTagContent(tag)"></span>
-        </BaseTag>
-      </template>
-      <div v-if="props.links.length" class="flex gap-4 mt-4">
+      <div class="flex flex-wrap gap-2 mt-auto">
+        <template v-if="props.tags.length">
+          <BaseTag v-for="(tag, index) in props.tags" :key="'tag-' + index">
+            <span v-html="renderTagContent(tag)"></span>
+          </BaseTag>
+        </template>
+      </div>
+      
+      <div v-if="props.links.length" class="flex gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-700/50">
         <a
           v-for="(link, index) in props.links"
           :key="'link-' + index"
           :href="link.url"
           target="_blank"
           rel="noopener noreferrer"
-          class="project-link text-indigo-600 hover:text-indigo-800 font-medium border-b border-indigo-600 hover:border-indigo-800 transition duration-150"
+          class="project-link inline-flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition duration-150 group/link"
         >
           {{ link.text }}
+          <svg class="w-4 h-4 ml-1 opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
         </a>
       </div>
     </div>

@@ -71,11 +71,15 @@ const visibleProjects = computed(() => (showAll.value ? projects : projects.slic
 </script>
 
 <template>
-  <section id="projects" class="py-16 bg-white">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-10">My Projects</h2>
+  <section id="projects" class="py-24 bg-slate-50/50 dark:bg-slate-900/50 transition-colors duration-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-16 flex flex-col items-center justify-center text-center">
+        <h2 class="text-sm font-mono text-indigo-600 dark:text-indigo-400 tracking-wider uppercase mb-2">Portfolio</h2>
+        <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">Featured Projects</h3>
+        <p class="mt-4 max-w-2xl text-lg text-slate-600 dark:text-slate-400">Some of the selected works that showcase my skills and passion for building impactful solutions.</p>
+      </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <CardFeature
           v-for="project in visibleProjects"
           :key="project.id"
@@ -84,14 +88,14 @@ const visibleProjects = computed(() => (showAll.value ? projects : projects.slic
           :description="project.description"
           :tags="project.tags"
           :links="project.links"
-          :layout="'horizontal'"
-          class="slide-in"
+          :layout="'vertical'"
+          class="h-full"
         />
       </div>
 
-      <div class="flex justify-center mt-8">
+      <div class="flex justify-center mt-12">
         <BaseButton
-          :text="showAll ? 'Sembunyikan' : 'Lihat Semua Project'"
+          :text="showAll ? 'Show Less' : 'View All Projects'"
           :icon="showAll ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'"
           :onClick="() => (showAll = !showAll)"
         />
