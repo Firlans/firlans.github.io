@@ -1,69 +1,114 @@
-# my-portofolio
+# Firlan Syah's Portfolio
 
-This template should help get you started developing with Vue 3 in Vite.
+Welcome to my portfolio repository! I'm **Firlan Syah**, a Back-end Developer with a background in Computer Science.
 
-## Recommended IDE Setup
+> I'm passionate about creating innovative solutions and exploring cutting-edge technologies.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## About This Project
 
-## Recommended Browser Setup
+This portfolio is built using Vue 3 and Vite.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Component Documentation
 
-## Customize configuration
+Portfolio app components are grouped into `base`, `features`, and `layouts`.
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+### Base Components
 
-## Project Setup
+#### BaseButton
 
-```sh
-npm install
-```
+Primary action button with fixed Tailwind styling.
 
-### Compile and Hot-Reload for Development
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `text` | `String` | required | Button label |
+| `icon` | `String` | `undefined` | Optional icon class rendered before text |
+| `onClick` | `Function` | `undefined` | Click handler passed from parent |
+| `disabled` | `Boolean` | `false` | Disabled state |
 
-```sh
-npm run dev
-```
+Notes:
 
-### Compile and Minify for Production
+- The template references `iconRight`, but that prop does not exist in the component API.
+- Click handling is delegated via prop instead of emitting a Vue event.
 
-```sh
-npm run build
-```
+#### BaseInput
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+Basic labeled input with `v-model` support.
 
-```sh
-npm run test:unit
-```
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `type` | `String` | `'text'` | Native input type |
+| `placeholder` | `String` | `''` | Placeholder text |
+| `label` | `String` | `''` | Input label |
+| `modelValue` | `String \| Number` | `''` | Bound value |
+| `id` | `String` | generated | Input id used by the label |
+| `disabled` | `Boolean` | `false` | Disabled state |
+| `required` | `Boolean` | `false` | Required flag and asterisk marker |
 
-### Run End-to-End Tests with [Playwright](https://playwright.dev)
+Event:
 
-```sh
-# Install browsers for the first run
-npx playwright install
+- `update:modelValue`
 
-# When testing on CI, must build the project first
-npm run build
+#### BaseTag
 
-# Runs the end-to-end tests
-npm run test:e2e
-# Runs the tests only on Chromium
-npm run test:e2e -- --project=chromium
-# Runs the tests of a specific file
-npm run test:e2e -- tests/example.spec.ts
-# Runs the tests in debug mode
-npm run test:e2e -- --debug
-```
+Small pill-style wrapper component. It has no props and only renders the default slot inside a styled `span`.
 
-### Lint with [ESLint](https://eslint.org/)
+#### MaintenanceLayer
 
-```sh
-npm run lint
-```
+Overlay card for unavailable content.
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `label` | `String` | `'This section is temporarily unavailable.'` | Heading text |
+| `description` | `String` | `'Please try again later or refresh the page.'` | Supporting text |
+
+### Feature Components
+
+#### CardFeature
+
+Reusable content card for experience, education, or project entries.
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `layout` | `String` | `'horizontal'` | `horizontal` or `vertical` layout |
+| `imgSrc` | `String` | required | Image or logo URL |
+| `title` | `String` | required | Main title |
+| `shortDescription` | `String` | required | Subtitle or role |
+| `description` | `String` | required | Main descriptive paragraph |
+| `details` | `Array` | `[]` | Bullet list of supporting details |
+| `duration` | `String` | required | Date range or duration |
+| `labels` | `Array` | `[]` | Declared but currently unused in template |
+| `tags` | `Array` | `[]` | Rendered with `BaseTag` |
+| `links` | `Array` | `[]` | CTA links in format `{ text, url }` |
+
+Behavior:
+
+- `vertical` mode forces a stacked card layout.
+- Tag content is rendered with `v-html`, so tag strings may contain HTML.
+
+#### MaintenanceFeature
+
+Full maintenance-mode section for the portfolio landing page. This component does not expose props; all content is currently static inside the template.
+
+#### SliderFeature
+
+The file exists but is currently empty, so there is no public API yet.
+
+#### TableFeature
+
+The file exists but is currently empty, so there is no public API yet.
+
+### Layout Components
+
+#### FooterLayout
+
+Static footer section containing quick links, social links, and a back-to-top link. It currently has no props or emitted events; navigation items are defined internally in the component.
+
+#### HeaderLayout
+
+Sticky header with desktop and mobile navigation.
+
+Internal behavior:
+
+- Maintains `isMenuOpen` locally with `ref(false)`.
+- Uses a hard-coded `navLinks` array for section anchors and icon classes.
+- Mobile menu closes itself when a navigation link is clicked.
